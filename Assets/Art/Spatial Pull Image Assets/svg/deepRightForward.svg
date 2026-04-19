@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 167.13">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer_1">
+    <g id="deepRightForward">
+      <g>
+        <polygon points="65.5 .88 65.5 166.38 .5 166.38 .5 56.38 65.25 .59 65.5 .88"/>
+        <g>
+          <line class="cls-1" x1="65.5" y1=".88" x2="65.5" y2="166.38"/>
+          <polyline class="cls-1" points=".5 56.38 .5 166.38 .5 166.88"/>
+          <polyline class="cls-1" points="65.5 .38 65.25 .59 .5 56.38"/>
+          <line class="cls-1" x1="65.5" y1="166.38" x2=".5" y2="166.38"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
