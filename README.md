@@ -1,7 +1,6 @@
-# Themvlab_spatialtrainer_MRdemo
-Repo for "The mv lab spatial trainer MR demo"
+# \#README
 
-## The mv lab spatial game prototype (version 1, summer 2024) README
+## the mv lab spatial game \#README
 
 # Project Specs
 
