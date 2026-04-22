@@ -7,37 +7,58 @@ public class TouchMe : MonoBehaviour
     private string value;
     private string newValue;
 
-    // Start is called before the first frame update
     void Start()
     {
         value = "Neither";
         newValue = "Neither";
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("COLLISION");
-        // Temporary fix
-        value = "Right";
-        if (other.gameObject.tag == "RightHand") // NOT WORKING
+        // Diagnostic: log exactly what collided, its tag, and its parent's tag
+        string parentTag = other.transform.parent != null ? other.transform.parent.tag : "(no parent)";
+        Debug.Log($"COLLISION | name={other.gameObject.name} | tag={other.gameObject.tag} | parent.tag={parentTag}");
+
+        // Walk up the hierarchy to find a RightHand or LeftHand tag.
+        // Handles the common case where the collider sits on a child of the tagged controller.
+        string detected = FindHandTagInAncestors(other.transform);
+
+        if (detected == "RightHand")
         {
             value = "Right";
-            Debug.Log("RIGHT HAND TAG");
-        } else if (other.gameObject.tag == "LeftHand") // NOT WORKING
+            Debug.Log("RIGHT HAND DETECTED");
+        }
+        else if (detected == "LeftHand")
         {
             value = "Left";
-            Debug.Log("LEFT HAND TAG");
+            Debug.Log("LEFT HAND DETECTED");
         }
+        else
+        {
+            Debug.Log("NEITHER HAND DETECTED - check controller tagging");
+        }
+    }
+
+    private string FindHandTagInAncestors(Transform start)
+    {
+        Transform current = start;
+        while (current != null)
+        {
+            if (current.CompareTag("RightHand")) return "RightHand";
+            if (current.CompareTag("LeftHand")) return "LeftHand";
+            current = current.parent;
+        }
+        return null;
     }
 
     public string CollisionDetector()
     {
+        newValue = value;
         newValue = value;
         value = "Neither";
         return newValue;

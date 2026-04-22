@@ -12,7 +12,6 @@ public class ScaleSequence : MonoBehaviour
     static private List<GameObject> diagonalScaleLeftHand;
     static private List<AudioClip> diagonalScaleChords;
 
-
     static private List<GameObject> axisScaleRightHand;
     static private List<GameObject> axisScaleLeftHand;
     static private List<AudioClip> axisScaleChords;
@@ -56,6 +55,9 @@ public class ScaleSequence : MonoBehaviour
     private bool rightHandScaleActive;
     private bool leftHandScaleActive;
 
+    // NEW: remember which scale the user picked so L/R toggle can re-apply it
+    private int currentScaleIndex = 0;
+
     [SerializeField] private AudioClip a;
     [SerializeField] private AudioClip b;
     [SerializeField] private AudioClip c;
@@ -64,63 +66,49 @@ public class ScaleSequence : MonoBehaviour
     [SerializeField] private AudioClip f;
     [SerializeField] private AudioClip g;
 
-    public bool isScaffoldedMode;
+    public bool isTutorial;
 
     [SerializeField] private AudioClip voiceoverTrack;
+    [SerializeField] private AudioClip voiceoverTrack_endingLoop;
+    [SerializeField] private AudioClip voiceoverTrack_optionalBite;
 
-    // Start is called before the first frame update
     void Start()
     {
         SetScaleSequences();
 
-        currentScale = dimensionalScaleRightHand;
-        currentBeat = currentScale[0];
-
-        currentBeat.transform.GetChild(0).gameObject.SetActive(true);
-
-        count = 0;
-
-        rightHandScaleActive = true;
+        rightHandScaleActive = true;  // default: Right
         leftHandScaleActive = false;
 
-        isScaffoldedMode = false;
+        currentScaleIndex = 0;
+        RefreshCurrentScale();
+
+        count = 0;
+        currentBeat = currentScale[0];
+        currentBeat.transform.GetChild(0).gameObject.SetActive(true);
+
+        isTutorial = false;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // This activates on either controller, not just Right or Left
         if (rightHandScaleActive && (currentBeat.GetComponent<TouchMe>().CollisionDetector() == "Right"))
         {
             ScaleProgressor();
-        } else if (leftHandScaleActive && currentBeat.GetComponent<TouchMe>().CollisionDetector() == "Left")
+        }
+        else if (leftHandScaleActive && currentBeat.GetComponent<TouchMe>().CollisionDetector() == "Left")
         {
             ScaleProgressor();
         }
 
-        // Switch between Right and Left Handed mode
-        if ((OVRInput.GetDown(OVRInput.Button.One) || OVRInput.GetDown(OVRInput.Button.Two)) && count == 0)
+        if (isTutorial)
         {
-            LeftOrRight(true);
-        }
-        if ((OVRInput.GetDown(OVRInput.Button.Three) || OVRInput.GetDown(OVRInput.Button.Four)) && count == 0)
-        {
-            LeftOrRight(false);
-        }
-
-        // Play tutorial VO's on Playing
-
-        if (isScaffoldedMode)
-        {
-            StartCoroutine(WaitThenDoSomething());
+            //StartCoroutine(WaitThenDoSomething());
             SoundManager.instance.PlaySoundClip(voiceoverTrack, transform, 1f);
         }
     }
 
     public void LeftOrRight(bool rOrL)
     {
-        ResetState();
-
         if (rOrL)
         {
             rightHandScaleActive = true;
@@ -131,30 +119,31 @@ public class ScaleSequence : MonoBehaviour
             rightHandScaleActive = false;
             leftHandScaleActive = true;
         }
+
+        // Actually swap the active scale to the L/R counterpart
+        RefreshCurrentScale();
+        ResetState();
     }
 
     void SetScaleSequences()
     {
         // Dimensional
-        
         dimensionalScaleRightHand = new List<GameObject>() { high, deep, right, left, forward, backward };
         dimensionalScaleLeftHand = new List<GameObject>() { high, deep, left, right, forward, backward };
         dimensionalScaleChords = new List<AudioClip>() { c, d, e, f, g, a };
 
         // Diagonal
-
-        diagonalScaleRightHand = new List<GameObject>() { highRightForward, deepLeftBackward, highLeftForward , deepRightBackward, highLeftBackward, deepRightForward, highRightBackward, deepLeftForward };
+        diagonalScaleRightHand = new List<GameObject>() { highRightForward, deepLeftBackward, highLeftForward, deepRightBackward, highLeftBackward, deepRightForward, highRightBackward, deepLeftForward };
         diagonalScaleLeftHand = new List<GameObject>() { highLeftForward, deepRightBackward, highRightForward, deepLeftBackward, highRightBackward, deepLeftForward, highLeftBackward, deepRightForward };
-        dimensionalScaleChords = new List<AudioClip>() { a, b, c, d, e, f, g, a };
+        // FIX: was mistakenly assigning to dimensionalScaleChords
+        diagonalScaleChords = new List<AudioClip>() { a, b, c, d, e, f, g, a };
 
         // Axis
-
         axisScaleRightHand = new List<GameObject>() { highRight, deepBackward, rightForward, deepLeft, highForward, leftBackward };
         axisScaleLeftHand = new List<GameObject>() { highLeft, deepBackward, leftForward, deepRight, highForward, rightBackward };
         axisScaleChords = new List<AudioClip>() { e, f, g, a, c, d };
 
         // Girdle
-
         girdleScaleRightHand = new List<GameObject>() { rightBackward, deepRight, deepForward, leftForward, highLeft, highBackward };
         girdleScaleLeftHand = new List<GameObject>() { leftBackward, deepLeft, deepForward, rightForward, highRight, highBackward };
         girdleScaleChords = new List<AudioClip>() { g, a, b, c, d, e };
@@ -162,47 +151,28 @@ public class ScaleSequence : MonoBehaviour
 
     public void SelectScale(int index)
     {
+        currentScaleIndex = index;
+        RefreshCurrentScale();
         ResetState();
+    }
 
-        if (index == 0)
+    // NEW: centralizes the scale selection so both SelectScale and LeftOrRight use it
+    private void RefreshCurrentScale()
+    {
+        switch (currentScaleIndex)
         {
-            if (rightHandScaleActive)
-            {
-                currentScale = dimensionalScaleRightHand;
-            } else
-            {
-                currentScale = dimensionalScaleLeftHand;
-            }
-        } else if (index == 1)
-        {
-            if (rightHandScaleActive)
-            {
-                currentScale = diagonalScaleRightHand;
-            }
-            else
-            {
-                currentScale = diagonalScaleLeftHand;
-            }
-        } else if (index == 2)
-        {
-            if (rightHandScaleActive)
-            {
-                currentScale = axisScaleRightHand;
-            }
-            else
-            {
-                currentScale = axisScaleLeftHand;
-            }
-        } else if (index == 3)
-        {
-            if (rightHandScaleActive)
-            {
-                currentScale = girdleScaleRightHand;
-            }
-            else
-            {
-                currentScale = girdleScaleLeftHand;
-            }
+            case 0:
+                currentScale = rightHandScaleActive ? dimensionalScaleRightHand : dimensionalScaleLeftHand;
+                break;
+            case 1:
+                currentScale = rightHandScaleActive ? diagonalScaleRightHand : diagonalScaleLeftHand;
+                break;
+            case 2:
+                currentScale = rightHandScaleActive ? axisScaleRightHand : axisScaleLeftHand;
+                break;
+            case 3:
+                currentScale = rightHandScaleActive ? girdleScaleRightHand : girdleScaleLeftHand;
+                break;
         }
     }
 
@@ -210,24 +180,33 @@ public class ScaleSequence : MonoBehaviour
     {
         Debug.Log("SCALE PROGRESSION");
         currentBeat.transform.GetChild(0).gameObject.SetActive(false);
-        //currentBeat.SetActive(false);
+
         if (count < currentScale.Count - 1)
         {
-            SoundManager.instance.PlaySoundClip(dimensionalScaleChords[count], currentBeat.transform, 1f);
+            SoundManager.instance.PlaySoundClip(GetActiveChords()[count], currentBeat.transform, 1f);
 
             count = count + 1;
             currentBeat = currentScale[count];
             currentBeat.transform.GetChild(0).gameObject.SetActive(true);
-        } else
+        }
+        else
         {
-            //SoundManager.instance.PlaySoundClip(b, currentBeat.transform, 1f);
             Debug.Log("REPEAT");
             currentBeat = currentScale[0];
             currentBeat.transform.GetChild(0).gameObject.SetActive(true);
-            //Debug.Log("END");
-            //currentBeat = null;
-            //currentScale = null;
             count = 0;
+        }
+    }
+
+    private List<AudioClip> GetActiveChords()
+    {
+        switch (currentScaleIndex)
+        {
+            case 0: return dimensionalScaleChords;
+            case 1: return diagonalScaleChords;
+            case 2: return axisScaleChords;
+            case 3: return girdleScaleChords;
+            default: return dimensionalScaleChords;
         }
     }
 
@@ -242,6 +221,15 @@ public class ScaleSequence : MonoBehaviour
     {
         count = 0;
 
-        currentBeat = currentScale[0];
+        if (currentScale != null && currentScale.Count > 0)
+        {
+            // deactivate whatever was highlighted, then highlight beat 0 of the new scale
+            if (currentBeat != null)
+            {
+                currentBeat.transform.GetChild(0).gameObject.SetActive(false);
+            }
+            currentBeat = currentScale[0];
+            currentBeat.transform.GetChild(0).gameObject.SetActive(true);
+        }
     }
 }

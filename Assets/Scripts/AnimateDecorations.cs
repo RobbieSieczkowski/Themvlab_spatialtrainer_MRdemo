@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class AnimateDecorations : MonoBehaviour
 {
-    [SerializeField]
     private Vector3 rotationVector = new Vector3(0f, 180f, 0f);
-    [SerializeField]
     private float rotationSpeed = 25f;
     private float duration = 2f;
 
@@ -16,6 +14,6 @@ public class AnimateDecorations : MonoBehaviour
 
         duration = duration - Random.Range(0.0f, 1f); // Add some randomness to the duration for a more natural effect
 
-        transform.DOLocalMoveY(3f, duration).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+        transform.DOLocalMoveY(1f, duration).SetRelative().SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
     }
 }
