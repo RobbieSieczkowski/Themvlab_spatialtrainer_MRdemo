@@ -59,8 +59,16 @@ public class TouchMe : MonoBehaviour
     public string CollisionDetector()
     {
         newValue = value;
-        newValue = value;
+        if (value != "Neither")
+        {
+            Debug.Log($"[DETECTOR] t={Time.time:F3} {gameObject.name} returning {value}");
+        }
         value = "Neither";
         return newValue;
+    }
+    public void ClearState()
+    {
+        value = "Neither";
+        newValue = "Neither";
     }
 }

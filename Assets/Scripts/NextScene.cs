@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,7 +10,7 @@ public class NextScene : MonoBehaviour
     [SerializeField] private GameObject freePlayModeUI;
 
     [Header("Spatial Pulls")]
-    [SerializeField] private GameObject spatialPulls;
+    [SerializeField] private GameObject kinesphere;
 
     [Header("Game Mode Script")]
     [SerializeField] private ScaleSequence scaleSequence;
@@ -19,10 +19,10 @@ public class NextScene : MonoBehaviour
     [Header("Coaching Cards (in order)")]
     [SerializeField] private GameObject[] coachingCards;
 
-    [Header("Platonic Solids")]
-    [SerializeField] public GameObject platonicSolids;
-
     private int currentCardIndex = 0;
+
+    [Header("Tutorial")]
+    [SerializeField] private TutorialController tutorialController;
 
     private void Start()
     {
@@ -33,17 +33,21 @@ public class NextScene : MonoBehaviour
     {
         DeactivateAll();
 
-        spatialPulls.SetActive(true);
-        
-        scaleSequence.enabled = true;
-
         if (tutorialUI != null && tutorialUI.activeInHierarchy)
         {
             scaleSequence.isTutorial = true;
+            scaleSequence.enabled = false;
 
             if (coachingCard != null)
             {
                 coachingCard.SetActive(false);
+            }
+
+            StartCoroutine(WaitThenDoSomething());
+
+            if (tutorialController != null)
+            {
+                tutorialController.StartTutorial();
             }
         }
 
@@ -51,28 +55,28 @@ public class NextScene : MonoBehaviour
         {
             scaleSequence.isTutorial = false;
 
+            scaleSequence.enabled = true;
+
+            kinesphere.SetActive(true);
+
             if (coachingCard != null)
             {
                 coachingCard.SetActive(false);
             }
 
-            if (platonicSolids != null)
-            {
-                platonicSolids.SetActive(true);
-            }
+            scaleSequence.SelectScale(0);
         }
     }
 
     private void DeactivateAll()
     {
         scaleSequence.ResetState();
-        spatialPulls.SetActive(false);
+        kinesphere.SetActive(false);
         scaleSequence.enabled = false;
 
-        if (platonicSolids != null)
-        {
-            platonicSolids.SetActive(false);
-        }
+        if (scaleSequence.cube != null) scaleSequence.cube.SetActive(false);
+        if (scaleSequence.octahedron != null) scaleSequence.octahedron.SetActive(false);
+        if (scaleSequence.icosahedron != null) scaleSequence.icosahedron.SetActive(false);
     }
 
     public void NextCoachingCard()
@@ -86,6 +90,12 @@ public class NextScene : MonoBehaviour
 
     public void ReturnToCoachingCard()
     {
+        if (tutorialController != null)
+        {
+            tutorialController.StopTutorial();
+        }
+
+        SoundManager.instance.StopAllSounds();
         DeactivateAll();
 
         if (coachingCard != null)
@@ -97,6 +107,13 @@ public class NextScene : MonoBehaviour
             coachingCards[i].SetActive(i == 0);
 
         currentCardIndex = 0;
+    }
+
+    IEnumerator WaitThenDoSomething()
+    {
+        Debug.Log("Waiting...");
+        yield return new WaitForSeconds(1f);
+        Debug.Log("2 seconds later!");
     }
 
     /**

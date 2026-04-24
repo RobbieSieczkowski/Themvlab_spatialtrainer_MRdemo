@@ -68,9 +68,10 @@ public class ScaleSequence : MonoBehaviour
 
     public bool isTutorial;
 
-    [SerializeField] private AudioClip voiceoverTrack;
-    [SerializeField] private AudioClip voiceoverTrack_endingLoop;
-    [SerializeField] private AudioClip voiceoverTrack_optionalBite;
+    [Header("Platonic Solids")]
+    [SerializeField] public GameObject cube;
+    [SerializeField] public GameObject octahedron;
+    [SerializeField] public GameObject icosahedron;
 
     void Start()
     {
@@ -98,12 +99,6 @@ public class ScaleSequence : MonoBehaviour
         else if (leftHandScaleActive && currentBeat.GetComponent<TouchMe>().CollisionDetector() == "Left")
         {
             ScaleProgressor();
-        }
-
-        if (isTutorial)
-        {
-            //StartCoroutine(WaitThenDoSomething());
-            SoundManager.instance.PlaySoundClip(voiceoverTrack, transform, 1f);
         }
     }
 
@@ -135,7 +130,6 @@ public class ScaleSequence : MonoBehaviour
         // Diagonal
         diagonalScaleRightHand = new List<GameObject>() { highRightForward, deepLeftBackward, highLeftForward, deepRightBackward, highLeftBackward, deepRightForward, highRightBackward, deepLeftForward };
         diagonalScaleLeftHand = new List<GameObject>() { highLeftForward, deepRightBackward, highRightForward, deepLeftBackward, highRightBackward, deepLeftForward, highLeftBackward, deepRightForward };
-        // FIX: was mistakenly assigning to dimensionalScaleChords
         diagonalScaleChords = new List<AudioClip>() { a, b, c, d, e, f, g, a };
 
         // Axis
@@ -174,27 +168,45 @@ public class ScaleSequence : MonoBehaviour
                 currentScale = rightHandScaleActive ? girdleScaleRightHand : girdleScaleLeftHand;
                 break;
         }
+
+        UpdatePlatonicSolid();
     }
 
     void ScaleProgressor()
     {
         Debug.Log("SCALE PROGRESSION");
+
+        // Figure out which hand triggered this progression so we only rumble that controller
+        string hitHand = rightHandScaleActive ? "Right" : "Left";
+
         currentBeat.transform.GetChild(0).gameObject.SetActive(false);
 
         if (count < currentScale.Count - 1)
         {
-            SoundManager.instance.PlaySoundClip(GetActiveChords()[count], currentBeat.transform, 1f);
+            SoundManager.instance.PlaySoundClip(GetActiveChords()[count], currentBeat.transform, 0.5f);
+            FireHaptic(hitHand);
 
             count = count + 1;
             currentBeat = currentScale[count];
             currentBeat.transform.GetChild(0).gameObject.SetActive(true);
+
+            // NEW: clear any stale collision data on the new beat
+            currentBeat.GetComponent<TouchMe>().ClearState();
         }
         else
         {
             Debug.Log("REPEAT");
+
+            // Play the final chord before looping back
+            SoundManager.instance.PlaySoundClip(GetActiveChords()[count], currentBeat.transform, 0.5f);
+            FireHaptic(hitHand);
+
             currentBeat = currentScale[0];
             currentBeat.transform.GetChild(0).gameObject.SetActive(true);
             count = 0;
+            
+            // NEW: clear any stale collision data on the new beat
+            currentBeat.GetComponent<TouchMe>().ClearState();
         }
     }
 
@@ -210,11 +222,23 @@ public class ScaleSequence : MonoBehaviour
         }
     }
 
-    IEnumerator WaitThenDoSomething()
+    private void FireHaptic(string hand)
     {
-        Debug.Log("Waiting...");
-        yield return new WaitForSeconds(3f);
-        Debug.Log("3 seconds later!");
+        if (HapticFX.instance == null) return;
+
+        if (hand == "Right") HapticFX.instance.PulseRight();
+        else if (hand == "Left") HapticFX.instance.PulseLeft();
+    }
+
+    private void UpdatePlatonicSolid()
+    {
+        if (isTutorial) return;
+
+        // Deactivate all, then activate the current one
+        if (octahedron != null) octahedron.SetActive(currentScaleIndex == 0);
+        if (cube != null) cube.SetActive(currentScaleIndex == 1);
+        if (icosahedron != null) icosahedron.SetActive(currentScaleIndex == 2 || currentScaleIndex == 3);
+
     }
 
     public void ResetState()

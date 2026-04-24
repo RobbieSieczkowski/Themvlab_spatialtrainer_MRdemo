@@ -36,4 +36,21 @@ public class SoundManager : MonoBehaviour
         // Destroy the clip after it is done
         Destroy(audioSource.gameObject, clipLength);
     }
+
+    public void StopAllSounds()
+    {
+        // Find every AudioSource spawned by this manager and destroy it.
+        // The spawned prefab is named after the soundObject prefab ("Sound Object(Clone)" or similar).
+        // Using the prefab name ensures we only stop OUR spawned sounds, not UI audio or other sources.
+        string targetName = soundObject.name + "(Clone)";
+
+        AudioSource[] allSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        foreach (AudioSource src in allSources)
+        {
+            if (src.gameObject.name == targetName)
+            {
+                Destroy(src.gameObject);
+            }
+        }
+    }
 }
