@@ -2,7 +2,7 @@
 
 ## The mv lab spatial trainer MR demo V1.0 README
 
-[![License: MIT](https://shields.io)](https://opensource.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 # Project Specs
 
