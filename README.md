@@ -2,6 +2,8 @@
 
 ## The mv lab spatial trainer MR demo V1.0 README
 
+[![License: MIT](https://shields.io)](https://opensource.org)
+
 # Project Specs
 
 Platform: Standalone MR (Meta Quest 2 and 3\)  
@@ -67,7 +69,7 @@ All voiceovers were recorded by Dr. Jenny Oyallon-Koloski.
 
 Third party asset attributions include the following Standard Unity Asset Store EULA-licensed packages:
 
-* DOTween (HOTween v2) by Demigiant  
+* DOTween (HOTween v2) by Demigiant
 * Hyper Casual FX Pack Vol.1 by Kyeoms
 
-Built with the Unity game engine by Unity Technologies.  
+Built with the Unity game engine by Unity Technologies.
