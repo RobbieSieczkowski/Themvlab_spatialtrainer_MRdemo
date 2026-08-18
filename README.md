@@ -4,6 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](License.txt)
 
+The mv lab spatial trainer MR is a mixed reality research project developed by Robbie Sieczkowski under the supervision of his Informatics PhD advisor, Dr. Jenny Oyallon-Koloski, a Certified Movement Analyst in Laban/Bartenieff Movement Studies. The goal of the app is to provide bodies an opportunity to incorporate Laban Movement Analysis information, such as movement scales, through interaction with a digital, spatial environment. The app guides users through a scaffolded experience with voiceover from Jenny Oyallon-Koloski as the subject matter expert. Initial app development was completed on a 2024 independent study supervised by Dr. Jenny Oyallon-Koloski in the mv lab environment, and the current version was upgraded to Unity 6 in the Game Studies & Design PLAYLab.
+
 # Project Specs
 
 Platform: Standalone MR (Meta Quest 2 and 3\)  
